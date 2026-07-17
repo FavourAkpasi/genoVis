@@ -25,9 +25,7 @@ export const ExplorerView = () => {
   const renderLineages = () => {
     if (lineageQuery.isPending) return <p className="mt-3 text-sm text-muted-foreground">Loading…</p>;
     if (lineageQuery.isError)
-      return (
-        <p className="mt-3 text-sm text-destructive">Failed to load: {lineageQuery.error.message}</p>
-      );
+      return <p className="mt-3 text-sm text-destructive">Failed to load: {lineageQuery.error.message}</p>;
     return (
       <ul className="mt-3 flex flex-col gap-2">
         {topLineages.map((row) => (
@@ -41,9 +39,9 @@ export const ExplorerView = () => {
   };
 
   return (
-    <div className="mx-auto flex min-h-svh max-w-2xl flex-col gap-6 p-8">
+    <div className="mx-auto flex max-w-2xl flex-col gap-6 p-8">
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">GenoVis</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Explorer</h1>
         <p className="text-sm text-muted-foreground">Live connection to the cov-spectrum LAPIS dataset.</p>
       </header>
 
