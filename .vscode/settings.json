@@ -1,0 +1,8 @@
+{
+  "//": "shadcn base-luma components use many mutually-exclusive stateful variant classes (data-[side=*], focus-within:, data-open/closed, **:descendant selectors). Tailwind IntelliSense's cssConflict rule flags these as false positives, so it is disabled here.",
+  "tailwindCSS.lint.cssConflict": "ignore",
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ]
+}

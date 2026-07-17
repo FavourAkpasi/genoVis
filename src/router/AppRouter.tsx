@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { CaseStudyView } from '@/components/modules/case-study/case-study-view';
 import { ExplorerView } from '@/components/modules/explorer/explorer-view';
+import { InsightsView } from '@/components/modules/insights/insights-view';
 import { routes } from '@/router/routes';
 
 const router = createBrowserRouter([
@@ -11,6 +12,7 @@ const router = createBrowserRouter([
     children: [
       { path: routes.explorer, element: <ExplorerView /> },
       { path: routes.caseStudy, element: <CaseStudyView /> },
+      { path: routes.insights, element: <InsightsView /> },
       { path: '*', element: <Navigate to={routes.explorer} replace /> },
     ],
   },

@@ -30,6 +30,7 @@ Still to land: **Playwright** (E2E) + `test:integration*` Vitest scripts. Update
 
 - **Endpoints**: add all new API endpoints to `src/lib/endpoints.ts` only — never inline URLs elsewhere.
 - **Classnames**: always use `cn()` from `@/lib/utils` — never template-literal string concatenation.
+- **UI primitives**: built on `@base-ui/react` (NOT Radix). shadcn's `base-luma` style **serves Base UI components** — add them with `npx shadcn add <name>` (card, dropdown-menu, popover, calendar, combobox, dialog, table, tabs, tooltip, sheet, command, …); do NOT hand-build what the registry provides. Icons: `@tabler/icons-react`. Calendar is `react-day-picker`. Wrappers that add real logic get a `custom-` prefix (e.g. `custom-select.tsx` on `combobox`, `custom-date-range-picker.tsx` on `popover`+`calendar`); thin passthroughs keep standard shadcn names. All in `src/components/ui/`.
 - **No nested ternaries**: never nest a ternary inside another ternary's branches. Use early returns or extract a named helper.
 - **Imports**: auto-sorted by `simple-import-sort` (Lint error if unsorted). Fix with `npm run format:write`.
 - **Unused vars**: prefix with `_` to suppress the lint error.
