@@ -1,7 +1,7 @@
-import { ExplorerView } from '@/components/modules/explorer/explorer-view';
+import { AppRouter } from '@/router/AppRouter';
 
 export const App = () => {
-  return <ExplorerView />;
+  return <AppRouter />;
 };
 
 export default App;
