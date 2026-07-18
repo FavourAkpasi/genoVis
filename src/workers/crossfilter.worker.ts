@@ -12,6 +12,7 @@
 
 import { lapisService } from '@/services/lapisService';
 import { SAMPLE_FIELDS } from '@/components/modules/explorer/sliceConfig';
+import { toCsv } from '@/lib/csv';
 import type { DetailRowT } from '@/types/lapis';
 import {
   type CrossfilterFilterT,
@@ -33,6 +34,10 @@ let dataset: DetailRowT[] = [];
 let matchedIndices: number[] = [];
 let currentFilter: CrossfilterFilterT = EMPTY_FILTER;
 let done = false;
+// Guards against a stale fetch loop: a new `fetch` bumps the token (and aborts the
+// in-flight request) so the previous loop stops appending instead of overshooting the target.
+let fetchToken = 0;
+let controller: AbortController | null = null;
 
 const post = (message: CrossfilterMessageT) => (postMessage as unknown as (value: unknown) => void)(message);
 
@@ -114,6 +119,12 @@ const emitState = () => post({ type: 'state', state: runQuery() });
 
 /** Page the slice in from LAPIS, re-querying after each page so the table fills progressively. */
 const runFetch = async (params: Parameters<typeof lapisService.getDetails>[0], target: number, pageSize: number) => {
+  // Cancel any fetch still in flight so two loops never append to the same dataset.
+  const token = (fetchToken += 1);
+  controller?.abort();
+  controller = new AbortController();
+  const signal = controller.signal;
+
   dataset = [];
   done = false;
   emitState();
@@ -122,11 +133,15 @@ const runFetch = async (params: Parameters<typeof lapisService.getDetails>[0], t
     const limit = Math.min(pageSize, target - offset);
     let page: DetailRowT[];
     try {
-      page = await lapisService.getDetails({ ...params, fields: SAMPLE_FIELDS, limit, offset });
+      page = await lapisService.getDetails({ ...params, fields: SAMPLE_FIELDS, limit, offset }, signal);
     } catch (error) {
+      if (token !== fetchToken) return; // superseded — swallow the abort quietly
       post({ type: 'error', message: error instanceof Error ? error.message : 'Failed to fetch slice' });
       return;
     }
+
+    // A newer fetch started while we awaited — stop before touching the shared dataset.
+    if (token !== fetchToken) return;
 
     for (const row of page) dataset.push(row);
 
@@ -162,8 +177,9 @@ onmessage = (event: MessageEvent) => {
   }
 
   if (message.type === 'export') {
+    // Build the CSV text here so serializing up to 100k rows never blocks the main thread.
     const rows = matchedIndices.slice(0, message.limit).map((index) => dataset[index]);
-    post({ type: 'export', rows });
+    post({ type: 'export', csv: toCsv(rows, SAMPLE_FIELDS) });
     return;
   }
 

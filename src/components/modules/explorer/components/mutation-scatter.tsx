@@ -3,8 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useAminoAcidMutations } from '@/components/modules/explorer/hooks/useAminoAcidMutations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScatterPlotSkeleton } from '@/components/ui/custom-skeletons';
+import { ExportMenu } from '@/components/ui/export-menu';
 import { NoDataAvailable } from '@/components/ui/no-data-available';
 import type { QueryParamsT } from '@/lib/endpoints';
+import { downloadCanvas } from '@/lib/svg-export';
 import type { MutationRowT } from '@/types/lapis';
 
 const HEIGHT = 360;
@@ -48,11 +50,24 @@ interface MutationScatterProps {
   params?: QueryParamsT;
 }
 
-const Frame = ({ subtitle, children }: { subtitle?: string; children: React.ReactNode }) => (
+const Frame = ({
+  subtitle,
+  action,
+  children,
+}: {
+  subtitle?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
   <Card>
     <CardHeader>
-      <CardTitle>Mutation landscape</CardTitle>
-      {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <CardTitle>Mutation landscape</CardTitle>
+          {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+        </div>
+        {action}
+      </div>
     </CardHeader>
     <CardContent className="pt-0">{children}</CardContent>
   </Card>
@@ -267,7 +282,23 @@ export const MutationScatter = ({ params = {} }: MutationScatterProps) => {
     ? `${fullNumber.format(rows.length)} mutations across ${geneCount} genes · residue position × frequency`
     : undefined;
 
-  return <Frame subtitle={subtitle}>{renderBody()}</Frame>;
+  const exportAction = (
+    <ExportMenu
+      items={[
+        {
+          label: 'Download PNG',
+          onSelect: () => canvasRef.current && downloadCanvas(canvasRef.current, 'mutation-landscape.png'),
+        },
+      ]}
+      disabled={!hasData}
+    />
+  );
+
+  return (
+    <Frame subtitle={subtitle} action={exportAction}>
+      {renderBody()}
+    </Frame>
+  );
 };
 
 export default MutationScatter;

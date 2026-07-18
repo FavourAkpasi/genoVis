@@ -64,5 +64,5 @@ export interface CrossfilterStateT {
 export type CrossfilterMessageT =
   | { type: 'state'; state: CrossfilterStateT }
   | { type: 'window'; start: number; rows: DetailRowT[] }
-  | { type: 'export'; rows: DetailRowT[] }
+  | { type: 'export'; csv: string }
   | { type: 'error'; message: string };

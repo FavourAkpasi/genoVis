@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { SAMPLE_FIELDS, SLICE_PAGE_SIZE, SLICE_TARGET } from '@/components/modules/explorer/sliceConfig';
-import { downloadCsv, toCsv } from '@/lib/csv';
+import { SLICE_PAGE_SIZE, SLICE_TARGET } from '@/components/modules/explorer/sliceConfig';
+import { downloadCsv } from '@/lib/csv';
 import type { QueryParamsT } from '@/lib/endpoints';
 import type { DetailRowT } from '@/types/lapis';
 import {
@@ -72,7 +72,7 @@ export const useCrossfilter = (params: QueryParamsT) => {
         return;
       }
       if (message.type === 'export') {
-        downloadCsv('genovis-samples.csv', toCsv(message.rows, SAMPLE_FIELDS));
+        downloadCsv('genovis-samples.csv', message.csv);
         return;
       }
       setError(message.message);

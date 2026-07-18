@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useLineageOverTime } from '@/components/modules/explorer/hooks/useLineageOverTime';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DistributionPlotSkeleton } from '@/components/ui/custom-skeletons';
+import { ExportMenu } from '@/components/ui/export-menu';
 import { NoDataAvailable } from '@/components/ui/no-data-available';
 import type { QueryParamsT } from '@/lib/endpoints';
+import { exportSvgToPng } from '@/lib/svg-export';
 import { cn } from '@/lib/utils';
 
 const VB_W = 800;
@@ -45,13 +47,18 @@ interface LineageOverTimeProps {
   onSelectLineage?: (lineage: string) => void;
 }
 
-const ChartFrame = ({ children }: { children: React.ReactNode }) => (
+const ChartFrame = ({ action, children }: { action?: React.ReactNode; children: React.ReactNode }) => (
   <Card>
     <CardHeader>
-      <CardTitle>Lineage prevalence over time</CardTitle>
-      <p className="text-xs text-muted-foreground">
-        Share of samples by lineage — 100% stacked. Click a legend item to filter.
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <CardTitle>Lineage prevalence over time</CardTitle>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Share of samples by lineage — 100% stacked. Click a legend item to filter.
+          </p>
+        </div>
+        {action}
+      </div>
     </CardHeader>
     <CardContent className="pt-0">{children}</CardContent>
   </Card>
@@ -60,6 +67,18 @@ const ChartFrame = ({ children }: { children: React.ReactNode }) => (
 export const LineageOverTime = ({ params = {}, activeLineage, onSelectLineage }: LineageOverTimeProps) => {
   const query = useLineageOverTime(params);
   const [hovered, setHovered] = useState<number | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const exportAction = (
+    <ExportMenu
+      items={[
+        {
+          label: 'Download PNG',
+          onSelect: () => svgRef.current && void exportSvgToPng(svgRef.current, 'lineage-prevalence.png'),
+        },
+      ]}
+      disabled={query.isPending || query.isError}
+    />
+  );
 
   if (query.isPending)
     return (
@@ -87,6 +106,7 @@ export const LineageOverTime = ({ params = {}, activeLineage, onSelectLineage }:
     .slice(0, TOP_N)
     .map(([lineage]) => lineage);
   const seriesKeys = [...topKeys, OTHER];
+  const hasActive = !!activeLineage && seriesKeys.includes(activeLineage);
 
   // Group counts by date.
   const byDate = new Map<number, Map<string, number>>();
@@ -153,9 +173,10 @@ export const LineageOverTime = ({ params = {}, activeLineage, onSelectLineage }:
   const active = hovered === null ? null : columns[hovered];
 
   return (
-    <ChartFrame>
+    <ChartFrame action={exportAction}>
       <div className="relative">
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${VB_W} ${VB_H}`}
           className="w-full"
           role="img"
@@ -196,7 +217,11 @@ export const LineageOverTime = ({ params = {}, activeLineage, onSelectLineage }:
           ))}
 
           {seriesKeys.map((key, index) => (
-            <path key={key} d={bandPath(index)} className={cn(FILL[index], 'opacity-90')} />
+            <path
+              key={key}
+              d={bandPath(index)}
+              className={cn(FILL[index], hasActive && key !== activeLineage ? 'opacity-15' : 'opacity-90')}
+            />
           ))}
 
           {active && (
@@ -256,9 +281,10 @@ export const LineageOverTime = ({ params = {}, activeLineage, onSelectLineage }:
                 aria-pressed={activeItem}
                 onClick={() => onSelectLineage?.(key)}
                 className={cn(
-                  'flex items-center gap-1.5 rounded px-1 py-0.5 text-xs',
+                  'flex items-center gap-1.5 rounded px-1 py-0.5 text-xs transition-opacity',
                   isOther ? 'cursor-default text-muted-foreground' : 'hover:bg-muted',
-                  activeItem && 'bg-muted font-medium text-foreground'
+                  activeItem && 'bg-muted font-medium text-foreground',
+                  hasActive && !activeItem && 'opacity-40'
                 )}
               >
                 <span className={cn('size-2.5 shrink-0 rounded-full', SWATCH[index])} />

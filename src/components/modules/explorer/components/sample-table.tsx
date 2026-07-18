@@ -1,12 +1,11 @@
-import { IconDownload } from '@tabler/icons-react';
 import { useEffect } from 'react';
 
 import { SliceRefine } from '@/components/modules/explorer/components/slice-refine';
 import { useAggregated } from '@/components/modules/explorer/hooks/useAggregated';
 import { SLICE_TARGET } from '@/components/modules/explorer/sliceConfig';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TableSkeleton } from '@/components/ui/custom-skeletons';
+import { ExportMenu } from '@/components/ui/export-menu';
 import { NoDataAvailable } from '@/components/ui/no-data-available';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EXPORT_LIMIT, useCrossfilter } from '@/hooks/useCrossfilter';
@@ -35,11 +34,24 @@ interface SampleTableProps {
   params?: QueryParamsT;
 }
 
-const Frame = ({ subtitle, children }: { subtitle?: string; children: React.ReactNode }) => (
+const Frame = ({
+  subtitle,
+  action,
+  children,
+}: {
+  subtitle?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) => (
   <Card>
     <CardHeader>
-      <CardTitle>Sample records</CardTitle>
-      {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <CardTitle>Sample records</CardTitle>
+          {subtitle && <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>}
+        </div>
+        {action}
+      </div>
     </CardHeader>
     <CardContent className="pt-0">{children}</CardContent>
   </Card>
@@ -121,32 +133,21 @@ export const SampleTable = ({ params = {} }: SampleTableProps) => {
     ? `${fullNumber.format(loaded)} of ${fullNumber.format(serverTotal)} samples held in the worker for client-side crossfiltering`
     : `Streaming slice into the worker — ${fullNumber.format(loaded)} of ${fullNumber.format(target)} rows…`;
 
-  const exportTitle =
+  const exportLabel =
     matched > EXPORT_LIMIT
-      ? `Downloads the first ${fullNumber.format(EXPORT_LIMIT)} of ${fullNumber.format(matched)} matching rows`
-      : `Downloads ${fullNumber.format(matched)} matching rows`;
+      ? `Download CSV (first ${fullNumber.format(EXPORT_LIMIT)} rows)`
+      : 'Download CSV (current filter)';
 
   return (
-    <Frame subtitle={subtitle}>
+    <Frame
+      subtitle={subtitle}
+      action={<ExportMenu items={[{ label: exportLabel, onSelect: exportCsv }]} disabled={!done || matched === 0} />}
+    >
       {!done && (
         <div className="mb-3 h-1 w-full overflow-hidden rounded-full bg-muted">
           <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${progress * 100}%` }} />
         </div>
       )}
-
-      <div className="mb-3 flex justify-end">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={exportCsv}
-          disabled={matched === 0}
-          title={exportTitle}
-          className="gap-1.5"
-        >
-          <IconDownload className="size-4" />
-          Export CSV
-        </Button>
-      </div>
 
       <SliceRefine
         filter={filter}

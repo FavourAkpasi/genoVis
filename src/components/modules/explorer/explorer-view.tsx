@@ -11,6 +11,9 @@ export const ExplorerView = () => {
   const filters = useExplorerStore((state) => state.filters);
   const setFilter = useExplorerStore((state) => state.setFilter);
   const params = filtersToParams(filters);
+  // Crossfilter self-exclusion: the lineage charts ignore the lineage filter so they always
+  // show the full breakdown (selected one highlighted, rest dimmed) instead of collapsing.
+  const lineageAgnosticParams = filtersToParams({ ...filters, lineage: '' });
 
   // Brushing: clicking a lineage in any chart filters the whole view (toggle off if re-clicked).
   const handleSelectLineage = (lineage: string) => setFilter('lineage', filters.lineage === lineage ? '' : lineage);
@@ -31,10 +34,18 @@ export const ExplorerView = () => {
 
         <div className="grid items-center justify-center gap-4 lg:grid-cols-3">
           <div className="col-span-2">
-            <LineageOverTime params={params} activeLineage={filters.lineage} onSelectLineage={handleSelectLineage} />
+            <LineageOverTime
+              params={lineageAgnosticParams}
+              activeLineage={filters.lineage}
+              onSelectLineage={handleSelectLineage}
+            />
           </div>
           <div className="col-span-1">
-            <LineageBar params={params} activeLineage={filters.lineage} onSelectLineage={handleSelectLineage} />
+            <LineageBar
+              params={lineageAgnosticParams}
+              activeLineage={filters.lineage}
+              onSelectLineage={handleSelectLineage}
+            />
           </div>
         </div>
         <TimeSeries params={params} />

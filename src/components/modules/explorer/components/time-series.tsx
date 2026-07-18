@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { useTimeSeries } from '@/components/modules/explorer/hooks/useTimeSeries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DistributionPlotSkeleton } from '@/components/ui/custom-skeletons';
+import { ExportMenu } from '@/components/ui/export-menu';
 import { NoDataAvailable } from '@/components/ui/no-data-available';
 import type { QueryParamsT } from '@/lib/endpoints';
+import { exportSvgToPng } from '@/lib/svg-export';
 
 const VB_W = 800;
 const VB_H = 300;
@@ -31,10 +33,13 @@ interface TimeSeriesProps {
   params?: QueryParamsT;
 }
 
-const ChartFrame = ({ children }: { children: React.ReactNode }) => (
+const ChartFrame = ({ action, children }: { action?: React.ReactNode; children: React.ReactNode }) => (
   <Card>
     <CardHeader>
-      <CardTitle>Samples over time</CardTitle>
+      <div className="flex items-start justify-between gap-3">
+        <CardTitle>Samples over time</CardTitle>
+        {action}
+      </div>
     </CardHeader>
     <CardContent className="pt-0">{children}</CardContent>
   </Card>
@@ -43,6 +48,18 @@ const ChartFrame = ({ children }: { children: React.ReactNode }) => (
 export const TimeSeries = ({ params = {} }: TimeSeriesProps) => {
   const query = useTimeSeries(params);
   const [hovered, setHovered] = useState<number | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const exportAction = (
+    <ExportMenu
+      items={[
+        {
+          label: 'Download PNG',
+          onSelect: () => svgRef.current && void exportSvgToPng(svgRef.current, 'samples-over-time.png'),
+        },
+      ]}
+      disabled={query.isPending || query.isError}
+    />
+  );
 
   if (query.isPending)
     return (
@@ -111,13 +128,14 @@ export const TimeSeries = ({ params = {} }: TimeSeriesProps) => {
   const active = hovered === null ? null : points[hovered];
 
   return (
-    <ChartFrame>
+    <ChartFrame action={exportAction}>
       <p className="mb-3 text-xs text-muted-foreground">
         {fullNumber.format(rows.length)} days · peak {fullNumber.format(peak.count)} on {formatDay(peak.t)}
       </p>
 
       <div className="relative">
         <svg
+          ref={svgRef}
           viewBox={`0 0 ${VB_W} ${VB_H}`}
           className="w-full"
           role="img"
