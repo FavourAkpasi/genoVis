@@ -5,6 +5,8 @@ import type { QueryParamsT } from '@/lib/endpoints';
 export interface ExplorerFiltersT {
   /** pangoLineage, e.g. "JN.1"; empty = all lineages. */
   lineage: string;
+  /** continent names, e.g. ["Europe"]; empty = all regions (ORed by LAPIS). */
+  regions: string[];
   /** country names, e.g. ["USA", "Germany"]; empty = all countries (ORed by LAPIS). */
   countries: string[];
   /** ISO date (yyyy-mm-dd); empty = unbounded. */
@@ -14,6 +16,7 @@ export interface ExplorerFiltersT {
 
 const initialFilters: ExplorerFiltersT = {
   lineage: '',
+  regions: [],
   countries: [],
   dateFrom: '',
   dateTo: '',
@@ -35,6 +38,7 @@ export const useExplorerStore = create<ExplorerStoreT>((set) => ({
 export const filtersToParams = (filters: ExplorerFiltersT): QueryParamsT => {
   const params: QueryParamsT = {};
   if (filters.lineage) params.pangoLineage = filters.lineage;
+  if (filters.regions.length > 0) params.region = filters.regions;
   if (filters.countries.length > 0) params.country = filters.countries;
   if (filters.dateFrom) params.dateFrom = filters.dateFrom;
   if (filters.dateTo) params.dateTo = filters.dateTo;

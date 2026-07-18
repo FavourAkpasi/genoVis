@@ -46,3 +46,12 @@ export const ScatterPlotSkeleton = () => (
     ))}
   </div>
 );
+
+/** Placeholder for a data table — a stack of full-width row bars. */
+export const TableSkeleton = ({ rows = 10 }: { rows?: number }) => (
+  <div className="flex flex-col gap-2">
+    {Array.from({ length: rows }).map((_, index) => (
+      <Skeleton key={index} className="h-8 w-full rounded-md" />
+    ))}
+  </div>
+);
