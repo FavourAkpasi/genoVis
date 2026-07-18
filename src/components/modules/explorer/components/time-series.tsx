@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import { useTimeSeries } from '@/components/modules/explorer/hooks/useTimeSeries';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DistributionPlotSkeleton } from '@/components/ui/custom-skeletons';
+import { NoDataAvailable } from '@/components/ui/no-data-available';
 import type { QueryParamsT } from '@/lib/endpoints';
 
 const VB_W = 800;
@@ -38,10 +40,6 @@ const ChartFrame = ({ children }: { children: React.ReactNode }) => (
   </Card>
 );
 
-const Message = ({ children, tone }: { children: React.ReactNode; tone?: 'error' }) => (
-  <div className={tone === 'error' ? 'text-sm text-destructive' : 'text-sm text-muted-foreground'}>{children}</div>
-);
-
 export const TimeSeries = ({ params = {} }: TimeSeriesProps) => {
   const query = useTimeSeries(params);
   const [hovered, setHovered] = useState<number | null>(null);
@@ -49,13 +47,13 @@ export const TimeSeries = ({ params = {} }: TimeSeriesProps) => {
   if (query.isPending)
     return (
       <ChartFrame>
-        <Message>Loading…</Message>
+        <DistributionPlotSkeleton />
       </ChartFrame>
     );
   if (query.isError)
     return (
       <ChartFrame>
-        <Message tone="error">Failed to load: {query.error.message}</Message>
+        <NoDataAvailable className="h-[280px]" text={`Couldn't load samples: ${query.error.message}`} />
       </ChartFrame>
     );
 
@@ -68,7 +66,7 @@ export const TimeSeries = ({ params = {} }: TimeSeriesProps) => {
   if (rows.length === 0)
     return (
       <ChartFrame>
-        <Message>No samples match these filters.</Message>
+        <NoDataAvailable className="h-[280px]" text="No samples match these filters." />
       </ChartFrame>
     );
 

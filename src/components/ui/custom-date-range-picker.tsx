@@ -12,6 +12,10 @@ interface CustomDateRangePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Earliest selectable month (bounds the year dropdown). Defaults to 10 years ago. */
+  startMonth?: Date;
+  /** Latest selectable month (bounds the year dropdown). Defaults to the current month. */
+  endMonth?: Date;
 }
 
 const formatDay = (date: Date) => date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -28,8 +32,14 @@ export const CustomDateRangePicker = ({
   placeholder = 'Pick a date range',
   disabled,
   className,
+  startMonth,
+  endMonth,
 }: CustomDateRangePickerProps) => {
   const label = formatRange(value);
+
+  const end = endMonth ?? new Date();
+  const start = startMonth ?? new Date(end.getFullYear() - 10, 0, 1);
+  const defaultMonth = value?.from ?? new Date(end.getFullYear(), end.getMonth() - 1, 1);
 
   return (
     <Popover>
@@ -46,7 +56,16 @@ export const CustomDateRangePicker = ({
         {label ?? placeholder}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto p-0">
-        <Calendar mode="range" selected={value} onSelect={onValueChange} numberOfMonths={2} />
+        <Calendar
+          mode="range"
+          captionLayout="dropdown"
+          startMonth={start}
+          endMonth={end}
+          defaultMonth={defaultMonth}
+          selected={value}
+          onSelect={onValueChange}
+          numberOfMonths={2}
+        />
       </PopoverContent>
     </Popover>
   );

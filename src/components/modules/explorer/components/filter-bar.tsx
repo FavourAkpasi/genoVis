@@ -8,6 +8,8 @@ import { CustomSelect } from '@/components/ui/custom-select';
 import { useExplorerStore } from '@/store/explorerStore';
 
 const LINEAGE_OPTION_LIMIT = 300;
+// Earliest month with LAPIS data — bounds the date picker's year dropdown.
+const LAPIS_START_MONTH = new Date(2020, 0, 1);
 
 const toISO = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -78,7 +80,7 @@ export const FilterBar = () => {
         </Field>
 
         <Field label="Date range">
-          <CustomDateRangePicker value={dateRange} onValueChange={handleDateChange} />
+          <CustomDateRangePicker value={dateRange} onValueChange={handleDateChange} startMonth={LAPIS_START_MONTH} />
         </Field>
 
         <Button variant="outline" onClick={reset}>

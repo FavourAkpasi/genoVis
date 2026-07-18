@@ -1,7 +1,9 @@
 import { FilterBar } from '@/components/modules/explorer/components/filter-bar';
+import { MutationScatter } from '@/components/modules/explorer/components/mutation-scatter';
 import { TimeSeries } from '@/components/modules/explorer/components/time-series';
 import { useAggregated } from '@/components/modules/explorer/hooks/useAggregated';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatSkeleton } from '@/components/ui/custom-skeletons';
 import { filtersToParams, useExplorerStore } from '@/store/explorerStore';
 
 const numberFormatter = new Intl.NumberFormat('en-US');
@@ -14,14 +16,14 @@ export const ExplorerView = () => {
   const total = totalQuery.data?.[0]?.count ?? 0;
 
   const renderTotal = () => {
-    if (totalQuery.isPending) return <p className="mt-1 text-3xl font-semibold">Loading…</p>;
+    if (totalQuery.isPending) return <StatSkeleton />;
     if (totalQuery.isError)
       return <p className="mt-1 text-sm text-destructive">Failed to load: {totalQuery.error.message}</p>;
     return <p className="mt-1 text-3xl font-semibold tabular-nums">{numberFormatter.format(total)}</p>;
   };
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-8">
+    <div className="mx-auto flex max-w-4xl flex-col gap-6 p-6 sm:p-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">Explorer</h1>
         <p className="text-sm text-muted-foreground">Live connection to the cov-spectrum LAPIS dataset.</p>
@@ -37,6 +39,8 @@ export const ExplorerView = () => {
       </Card>
 
       <TimeSeries params={params} />
+
+      <MutationScatter params={params} />
     </div>
   );
 };
