@@ -13,6 +13,7 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from '@/components/ui/combobox';
+import { cn } from '@/lib/utils';
 
 interface BaseProps {
   /** Option values. */
@@ -60,15 +61,17 @@ const MultiSelect = ({
 
   return (
     <Combobox items={items} multiple value={value} onValueChange={onValueChange} disabled={disabled}>
-      <ComboboxChips ref={anchorRef} className={className} aria-label={label}>
+      <ComboboxChips ref={anchorRef} className={cn('flex-nowrap overflow-hidden', className)} aria-label={label}>
         <ComboboxValue>
           {(selected: string[]) => (
             <>
               {selected.slice(0, maxVisibleChips).map((item) => (
-                <ComboboxChip key={item}>{item}</ComboboxChip>
+                <ComboboxChip key={item} className="max-w-24">
+                  <span className="max-w-24 truncate text-xs">{item}</span>
+                </ComboboxChip>
               ))}
               {selected.length > maxVisibleChips && (
-                <span className="flex h-[calc(--spacing(5.5))] items-center rounded-3xl bg-muted px-2 text-xs font-medium text-muted-foreground">
+                <span className="flex h-[calc(--spacing(5.5))] shrink-0 items-center rounded bg-muted text-xs font-medium text-muted-foreground">
                   +{selected.length - maxVisibleChips}
                 </span>
               )}

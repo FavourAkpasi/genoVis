@@ -25,14 +25,16 @@ export const DashboardLayout = () => {
 
   return (
     <div className="flex min-h-svh flex-col">
-      <header className="border-b">
-        <nav className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-4">
+      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
+        <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger render={<Button variant="ghost" size="icon" aria-label="Open menu" className="sm:hidden" />}>
               <IconMenu2 className="size-5" />
             </SheetTrigger>
             <SheetContent side="left" className="w-64">
-              <SheetTitle className="px-3 pt-2 text-sm font-semibold tracking-tight">GenoVis</SheetTitle>
+              <SheetTitle className="border-bottom-1 border p-3 text-3xl font-semibold tracking-tight">
+                GenoVis
+              </SheetTitle>
               <div className="mt-4 flex flex-col gap-1 px-2">
                 {navItems.map((item) => (
                   <NavLink key={item.to} to={item.to} end onClick={() => setMobileOpen(false)} className={navLinkClass}>
@@ -43,7 +45,7 @@ export const DashboardLayout = () => {
             </SheetContent>
           </Sheet>
 
-          <span className="text-sm font-semibold tracking-tight">GenoVis</span>
+          <span className="text-2xl font-semibold tracking-tight">GenoVis</span>
 
           <div className="hidden items-center gap-1 sm:flex">
             {navItems.map((item) => (

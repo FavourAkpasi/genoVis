@@ -32,6 +32,12 @@ export const FilterBar = () => {
   const setFilter = useExplorerStore((state) => state.setFilter);
   const reset = useExplorerStore((state) => state.reset);
 
+  const regionsQuery = useAggregated({ fields: ['region'] });
+  const regions = (regionsQuery.data ?? [])
+    .filter((row) => row.region)
+    .sort((a, b) => b.count - a.count)
+    .map((row) => String(row.region));
+
   const countriesQuery = useAggregated({ fields: ['country'] });
   const countries = (countriesQuery.data ?? [])
     .map((row) => String(row.country ?? ''))
@@ -55,15 +61,27 @@ export const FilterBar = () => {
 
   return (
     <Card>
-      <CardContent className="flex flex-wrap items-end gap-3">
+      <CardContent className="flex flex-wrap items-end gap-2">
         <Field label="Lineage">
           <CustomSelect
-            className="w-44"
+            className="w-32"
             label="Lineage"
             placeholder="All lineages"
             items={lineages}
             value={filters.lineage || null}
             onValueChange={(value) => setFilter('lineage', value ?? '')}
+          />
+        </Field>
+
+        <Field label="Regions">
+          <CustomSelect
+            multiple
+            className="w-64"
+            label="Regions"
+            placeholder="All regions"
+            items={regions}
+            value={filters.regions}
+            onValueChange={(value) => setFilter('regions', value)}
           />
         </Field>
 
