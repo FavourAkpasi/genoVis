@@ -88,3 +88,24 @@ export const STORY: SceneT[] = [
     params: HANDOVER,
   },
 ];
+
+/**
+ * The closing scene. Its visual is a bespoke animated SVG (not a live chart)
+ * and its prose carries the call to action into the Explorer.
+ */
+export interface FinaleT {
+  kicker: string;
+  title: string;
+  body: string[];
+  ctaLabel: string;
+}
+
+export const FINALE: FinaleT = {
+  kicker: 'Your turn',
+  title: 'One story. Endless slices.',
+  body: [
+    'This was a single path through the data. The Explorer hands you the same charts you just scrolled through — but with the filters unlocked.',
+    'Slice by lineage, country and date range, and watch every view respond live.',
+  ],
+  ctaLabel: 'Open the Explorer',
+};

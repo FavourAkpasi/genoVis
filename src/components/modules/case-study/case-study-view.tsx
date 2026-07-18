@@ -1,81 +1,144 @@
 import { IconArrowRight, IconChevronDown } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 
-import { SceneStep } from '@/components/modules/case-study/components/scene-step';
+import { FinaleGraphic } from '@/components/modules/case-study/components/finale/finale-graphic';
 import { StoryGraphic } from '@/components/modules/case-study/components/story-graphic';
 import { useActiveScene } from '@/components/modules/case-study/hooks/useActiveScene';
-import { STORY } from '@/components/modules/case-study/story';
+import { FINALE, STORY } from '@/components/modules/case-study/story';
+import type { SceneT } from '@/components/modules/case-study/story';
 import { buttonVariants } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { routes } from '@/router/routes';
 
-export const CaseStudyView = () => {
-  const { activeIndex, register } = useActiveScene(STORY.length);
-  const activeScene = STORY[activeIndex];
+// A step is either a live-chart scene or the animated finale.
+type StepT = { id: string; kind: 'chart'; scene: SceneT } | { id: string; kind: 'finale' };
 
+const STEPS: StepT[] = [
+  ...STORY.map((scene): StepT => ({ id: scene.id, kind: 'chart', scene })),
+  { id: 'finale', kind: 'finale' },
+];
+
+const stepMeta = (step: StepT) => (step.kind === 'finale' ? FINALE : step.scene);
+
+const StageHeader = () => (
+  <div className="flex flex-col gap-0.5">
+    <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">Case study</span>
+    <p className="text-lg font-semibold tracking-tight">Tracing a variant’s rise and fall</p>
+  </div>
+);
+
+const StepText = ({ step }: { step: StepT }) => {
+  const meta = stepMeta(step);
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <header className="flex max-w-2xl flex-col gap-4">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Case study · Guided narrative
-        </span>
-        <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
-          Tracing a variant’s rise and fall
-        </h1>
-        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-          In late 2021 a new lineage rewrote the pandemic in about ten weeks. Here is that handover, read live from ~9.4
-          million sequenced genomes — the same data the Explorer opens up, walked one step at a time.
+    <div className="flex max-w-md flex-col gap-3">
+      <span className="text-sm font-medium tracking-wider text-muted-foreground uppercase">{meta.kicker}</span>
+      <h2 className="text-4xl font-semibold tracking-tight text-balance sm:text-3xl">{meta.title}</h2>
+      {meta.body.map((paragraph, index) => (
+        <p key={index} className="text-xs leading-relaxed text-muted-foreground sm:text-base">
+          {paragraph}
         </p>
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <IconChevronDown className="size-4 motion-safe:animate-bounce" aria-hidden />
-          Scroll to begin
-        </div>
-      </header>
-
-      <div className="mt-8 grid gap-8 lg:mt-16 lg:grid-cols-2 lg:gap-16">
-        {/* Sticky graphic — the pinned visual updates as the prose scrolls past (lg+ only). */}
-        <div className="hidden lg:block">
-          <div className="sticky top-24 flex flex-col gap-4">
-            <div key={activeScene.id} className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:duration-500">
-              <StoryGraphic scene={activeScene} />
-            </div>
-            <ol className="flex items-center gap-2" aria-label="Story progress">
-              {STORY.map((scene, index) => (
-                <li key={scene.id}>
-                  <span
-                    aria-current={index === activeIndex ? 'step' : undefined}
-                    className={cn(
-                      'block h-1.5 rounded-full transition-all duration-500',
-                      index === activeIndex ? 'w-8 bg-foreground' : 'w-4 bg-muted-foreground/30'
-                    )}
-                  />
-                </li>
-              ))}
-            </ol>
-          </div>
-        </div>
-
-        {/* Scrolling prose column. */}
-        <div className="flex flex-col">
-          {STORY.map((scene, index) => (
-            <SceneStep key={scene.id} scene={scene} index={index} active={index === activeIndex} register={register} />
-          ))}
-        </div>
-      </div>
-
-      <section className="mt-8 flex flex-col items-start gap-4 rounded-xl border bg-muted/30 p-6 sm:mt-16 sm:p-8">
-        <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Your turn</h2>
-        <p className="max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          This was one path through the data. The Explorer lets you slice it by lineage, country and date range, and
-          watch every chart respond live — the same components you just scrolled through, with the controls in your
-          hands.
-        </p>
-        <Link to={routes.explorer} className={cn(buttonVariants(), 'gap-2')}>
-          Open the Explorer
+      ))}
+      {step.kind === 'finale' && (
+        <Link to={routes.explorer} className={cn(buttonVariants(), 'mt-2 w-fit gap-2')}>
+          {FINALE.ctaLabel}
           <IconArrowRight className="size-4" aria-hidden />
         </Link>
-      </section>
+      )}
     </div>
+  );
+};
+
+const StepGraphic = ({ step }: { step: StepT }) => {
+  if (step.kind === 'finale') {
+    return (
+      <Card className="border-none shadow-none">
+        <CardContent className="flex aspect-4/3 items-center justify-center p-4 sm:p-6">
+          <FinaleGraphic />
+        </CardContent>
+      </Card>
+    );
+  }
+  return <StoryGraphic scene={step.scene} />;
+};
+
+const ProgressRail = ({ activeIndex }: { activeIndex: number }) => (
+  <ol className="flex items-center justify-center gap-2" aria-label="Story progress">
+    {STEPS.map((step, index) => (
+      <li key={step.id}>
+        <span
+          aria-current={index === activeIndex ? 'step' : undefined}
+          className={cn(
+            'block h-1.5 rounded-full transition-all duration-500',
+            index === activeIndex ? 'w-8 bg-foreground' : 'w-4 bg-muted-foreground/30'
+          )}
+        />
+      </li>
+    ))}
+  </ol>
+);
+
+export const CaseStudyView = () => {
+  const { activeIndex, register } = useActiveScene(STEPS.length);
+  const activeStep = STEPS[activeIndex];
+
+  return (
+    <>
+      {/* Desktop: pinned stage. The section is tall enough to scroll through;
+          the stage stays fixed to the viewport while its content crossfades. */}
+      <section className="relative hidden lg:block" style={{ height: `${STEPS.length * 100}vh` }}>
+        {/* Zero-layout markers, one per step, drive the active index via IntersectionObserver. */}
+        {STEPS.map((step, index) => (
+          <div
+            key={step.id}
+            ref={register(index)}
+            data-scene-index={index}
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 h-screen"
+            style={{ top: `${index * 100}vh` }}
+          />
+        ))}
+
+        <div className="sticky top-14 flex h-[calc(100dvh-3.5rem)] flex-col gap-4 p-8 xl:px-16">
+          <StageHeader />
+          <div key={activeStep.id} className="grid flex-1 content-center items-center gap-14 md:grid-cols-2">
+            <div className="motion-safe:animate-in motion-safe:duration-500 motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2">
+              <StepText step={activeStep} />
+            </div>
+            <div className="motion-safe:animate-in motion-safe:duration-700 motion-safe:fade-in-0">
+              <StepGraphic step={activeStep} />
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <ProgressRail activeIndex={activeIndex} />
+            <span
+              className={cn(
+                'flex items-center gap-1.5 text-xl text-muted-foreground transition-opacity duration-500',
+                activeIndex !== STEPS.length - 1 ? 'opacity-100' : 'opacity-0'
+              )}
+            >
+              <IconChevronDown
+                className="size-8 rounded-full border border-muted-foreground p-1 motion-safe:animate-bounce"
+                aria-hidden
+              />
+              Scroll
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile: the pinned two-column layout doesn't fit, so fall back to a
+          normal vertical stack of the same steps. */}
+      <div className="flex flex-col gap-12 px-4 py-8 lg:hidden">
+        <StageHeader />
+        {STEPS.map((step) => (
+          <section key={step.id} className="flex flex-col gap-5">
+            <StepText step={step} />
+            <StepGraphic step={step} />
+          </section>
+        ))}
+      </div>
+    </>
   );
 };
 
