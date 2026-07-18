@@ -1,30 +1,22 @@
 import { FilterBar } from '@/components/modules/explorer/components/filter-bar';
+import { KpiRow } from '@/components/modules/explorer/components/kpi-row';
+import { LineageBar } from '@/components/modules/explorer/components/lineage-bar';
+import { LineageOverTime } from '@/components/modules/explorer/components/lineage-over-time';
 import { MutationScatter } from '@/components/modules/explorer/components/mutation-scatter';
 import { SampleTable } from '@/components/modules/explorer/components/sample-table';
 import { TimeSeries } from '@/components/modules/explorer/components/time-series';
-import { useAggregated } from '@/components/modules/explorer/hooks/useAggregated';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StatSkeleton } from '@/components/ui/custom-skeletons';
 import { filtersToParams, useExplorerStore } from '@/store/explorerStore';
-
-const numberFormatter = new Intl.NumberFormat('en-US');
 
 export const ExplorerView = () => {
   const filters = useExplorerStore((state) => state.filters);
+  const setFilter = useExplorerStore((state) => state.setFilter);
   const params = filtersToParams(filters);
 
-  const totalQuery = useAggregated(params);
-  const total = totalQuery.data?.[0]?.count ?? 0;
-
-  const renderTotal = () => {
-    if (totalQuery.isPending) return <StatSkeleton />;
-    if (totalQuery.isError)
-      return <p className="mt-1 text-sm text-destructive">Failed to load: {totalQuery.error.message}</p>;
-    return <p className="mt-1 text-3xl font-semibold tabular-nums">{numberFormatter.format(total)}</p>;
-  };
+  // Brushing: clicking a lineage in any chart filters the whole view (toggle off if re-clicked).
+  const handleSelectLineage = (lineage: string) => setFilter('lineage', filters.lineage === lineage ? '' : lineage);
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">Explorer</h1>
         <p className="text-sm text-muted-foreground">Live connection to the cov-spectrum LAPIS dataset.</p>
@@ -35,15 +27,17 @@ export const ExplorerView = () => {
       </div>
 
       <div className="flex flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-normal text-muted-foreground">Matching samples</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">{renderTotal()}</CardContent>
-        </Card>
+        <KpiRow params={params} />
 
+        <div className="grid items-center justify-center gap-4 lg:grid-cols-3">
+          <div className="col-span-2">
+            <LineageOverTime params={params} activeLineage={filters.lineage} onSelectLineage={handleSelectLineage} />
+          </div>
+          <div className="col-span-1">
+            <LineageBar params={params} activeLineage={filters.lineage} onSelectLineage={handleSelectLineage} />
+          </div>
+        </div>
         <TimeSeries params={params} />
-
         <MutationScatter params={params} />
 
         <SampleTable params={params} />

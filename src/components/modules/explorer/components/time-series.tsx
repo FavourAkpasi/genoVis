@@ -123,6 +123,15 @@ export const TimeSeries = ({ params = {} }: TimeSeriesProps) => {
           role="img"
           aria-label={`Sample counts over time from ${formatDay(tMin)} to ${formatDay(tMax)}, peaking at ${fullNumber.format(peak.count)} on ${formatDay(peak.t)}.`}
         >
+          {/* y-axis title */}
+          <text
+            transform={`translate(12 ${PAD.top + PLOT_H / 2}) rotate(-90)`}
+            textAnchor="middle"
+            className="fill-muted-foreground text-[10px]"
+          >
+            Samples per day
+          </text>
+
           {/* y grid + labels */}
           {yTicks.map((v) => (
             <g key={v}>

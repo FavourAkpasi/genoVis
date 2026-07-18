@@ -161,6 +161,12 @@ onmessage = (event: MessageEvent) => {
     return;
   }
 
+  if (message.type === 'export') {
+    const rows = matchedIndices.slice(0, message.limit).map((index) => dataset[index]);
+    post({ type: 'export', rows });
+    return;
+  }
+
   // message.type === 'window'
   const rows = matchedIndices.slice(message.start, message.start + message.count).map((index) => dataset[index]);
   post({ type: 'window', start: message.start, rows });

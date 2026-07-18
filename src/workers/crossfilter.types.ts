@@ -34,12 +34,14 @@ export const EMPTY_FILTER: CrossfilterFilterT = {
  * - `load`   — main thread pushes rows in (alternate TanStack ingestion path; replaces the slice).
  * - `query`  — apply a new client-side filter.
  * - `window` — request the row objects for a visible range of the filtered result.
+ * - `export` — request up to `limit` matched rows for a CSV download.
  */
 export type CrossfilterRequestT =
   | { type: 'fetch'; params: QueryParamsT; target: number; pageSize: number }
   | { type: 'load'; rows: DetailRowT[] }
   | { type: 'query'; filter: CrossfilterFilterT }
-  | { type: 'window'; start: number; count: number };
+  | { type: 'window'; start: number; count: number }
+  | { type: 'export'; limit: number };
 
 /** The result of one cross-filter pass over the loaded slice. */
 export interface CrossfilterStateT {
@@ -62,4 +64,5 @@ export interface CrossfilterStateT {
 export type CrossfilterMessageT =
   | { type: 'state'; state: CrossfilterStateT }
   | { type: 'window'; start: number; rows: DetailRowT[] }
+  | { type: 'export'; rows: DetailRowT[] }
   | { type: 'error'; message: string };

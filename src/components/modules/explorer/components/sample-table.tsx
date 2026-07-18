@@ -1,13 +1,15 @@
+import { IconDownload } from '@tabler/icons-react';
 import { useEffect } from 'react';
 
 import { SliceRefine } from '@/components/modules/explorer/components/slice-refine';
 import { useAggregated } from '@/components/modules/explorer/hooks/useAggregated';
 import { SLICE_TARGET } from '@/components/modules/explorer/sliceConfig';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TableSkeleton } from '@/components/ui/custom-skeletons';
 import { NoDataAvailable } from '@/components/ui/no-data-available';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCrossfilter } from '@/hooks/useCrossfilter';
+import { EXPORT_LIMIT, useCrossfilter } from '@/hooks/useCrossfilter';
 import { useVirtualRows } from '@/hooks/useVirtualRows';
 import type { QueryParamsT } from '@/lib/endpoints';
 import type { DetailRowT } from '@/types/lapis';
@@ -71,6 +73,7 @@ export const SampleTable = ({ params = {} }: SampleTableProps) => {
     toggleFacet,
     clear,
     ensureWindow,
+    exportCsv,
     getRow,
   } = useCrossfilter(params);
   const totalQuery = useAggregated(params);
@@ -118,6 +121,11 @@ export const SampleTable = ({ params = {} }: SampleTableProps) => {
     ? `${fullNumber.format(loaded)} of ${fullNumber.format(serverTotal)} samples held in the worker for client-side crossfiltering`
     : `Streaming slice into the worker — ${fullNumber.format(loaded)} of ${fullNumber.format(target)} rows…`;
 
+  const exportTitle =
+    matched > EXPORT_LIMIT
+      ? `Downloads the first ${fullNumber.format(EXPORT_LIMIT)} of ${fullNumber.format(matched)} matching rows`
+      : `Downloads ${fullNumber.format(matched)} matching rows`;
+
   return (
     <Frame subtitle={subtitle}>
       {!done && (
@@ -125,6 +133,20 @@ export const SampleTable = ({ params = {} }: SampleTableProps) => {
           <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${progress * 100}%` }} />
         </div>
       )}
+
+      <div className="mb-3 flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={exportCsv}
+          disabled={matched === 0}
+          title={exportTitle}
+          className="gap-1.5"
+        >
+          <IconDownload className="size-4" />
+          Export CSV
+        </Button>
+      </div>
 
       <SliceRefine
         filter={filter}

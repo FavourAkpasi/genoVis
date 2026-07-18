@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import type { QueryParamsT } from '@/lib/endpoints';
 import { lapisService } from '@/services/lapisService';
@@ -8,4 +8,7 @@ export const useAggregated = (params: QueryParamsT = {}) =>
   useQuery({
     queryKey: ['aggregated', params],
     queryFn: ({ signal }) => lapisService.getAggregated(params, signal),
+    // Keep the previous result visible while refetching so charts morph on filter change
+    // instead of flashing skeletons.
+    placeholderData: keepPreviousData,
   });

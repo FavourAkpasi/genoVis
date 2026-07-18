@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { SLICE_PAGE_SIZE, SLICE_TARGET } from '@/components/modules/explorer/sliceConfig';
+import { SAMPLE_FIELDS, SLICE_PAGE_SIZE, SLICE_TARGET } from '@/components/modules/explorer/sliceConfig';
+import { downloadCsv, toCsv } from '@/lib/csv';
 import type { QueryParamsT } from '@/lib/endpoints';
 import type { DetailRowT } from '@/types/lapis';
 import {
@@ -13,6 +14,9 @@ import {
 
 /** Rows requested around the visible range so small scrolls don't re-hit the worker. */
 const WINDOW_PAD = 40;
+
+/** Cap on a CSV export so a brushed 2M-row slice can't spawn a multi-GB blob. */
+export const EXPORT_LIMIT = 100_000;
 
 interface WindowDataT {
   start: number;
@@ -65,6 +69,10 @@ export const useCrossfilter = (params: QueryParamsT) => {
         windowRef.current = next;
         pendingRef.current = null;
         setWindowData(next);
+        return;
+      }
+      if (message.type === 'export') {
+        downloadCsv('genovis-samples.csv', toCsv(message.rows, SAMPLE_FIELDS));
         return;
       }
       setError(message.message);
@@ -121,6 +129,10 @@ export const useCrossfilter = (params: QueryParamsT) => {
     worker.postMessage({ type: 'window', start: desiredStart, count: desiredEnd - desiredStart });
   }, []);
 
+  const exportCsv = useCallback(() => {
+    workerRef.current?.postMessage({ type: 'export', limit: EXPORT_LIMIT });
+  }, []);
+
   const getRow = (index: number): DetailRowT | undefined => {
     if (!windowData) return undefined;
     if (index < windowData.start || index >= windowData.start + windowData.rows.length) return undefined;
@@ -147,6 +159,7 @@ export const useCrossfilter = (params: QueryParamsT) => {
     toggleFacet,
     clear,
     ensureWindow,
+    exportCsv,
     getRow,
   };
 };
