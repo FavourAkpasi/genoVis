@@ -36,8 +36,8 @@ export const STORY: SceneT[] = [
     kicker: 'Mid 2021',
     title: 'A world of Delta',
     body: [
-      'Each vertical slice of this chart is a moment in time. Its full height is split by lineage — a genetic label for one branch of the virus’s family tree — so the bands show each lineage’s share of sequenced samples, not raw counts.',
-      'Through 2021 the picture barely moves. The largest bands — AY.4, AY.103 and their siblings — are all descendants of Delta, the variant that defined that year. One family owns the chart.',
+      'Each vertical slice of this chart is a moment in time. Its full height is split by a genetic label for one branch of the virus’s family tree (Pango Lineage). The bands show each lineage’s share of sequenced samples, not raw counts.',
+      'Through 2021 the picture barely moves. The largest bands, AY.4, AY.103 and their siblings, are all descendants of Delta, the variant that defined that year. One family owns the chart.',
     ],
     chart: 'lineage-over-time',
     params: DELTA_ERA,
@@ -47,7 +47,7 @@ export const STORY: SceneT[] = [
     kicker: 'Winter 2021 → 2022',
     title: 'Three newcomers',
     body: [
-      'Now the window stretches into 2022, and the composition reorganises itself. Three bands that were absent before — BA.1, BA.1.1 and BA.2 — surge up out of the baseline.',
+      'Now the window stretches into 2022, and the composition reorganises itself. Three bands that were absent before, BA.1, BA.1.1 and BA.2, surge up out of the baseline.',
       'These are Omicron. In a matter of weeks they go from invisible to dominant, squeezing the Delta bands (the AY.* family) down into a thin strip along the bottom.',
     ],
     chart: 'lineage-over-time',
@@ -58,8 +58,8 @@ export const STORY: SceneT[] = [
     kicker: '≈ 10 weeks',
     title: 'The fastest handover',
     body: [
-      'Focus on a single newcomer — BA.1.1 — and the scale of the shift is obvious. On its own it grew to rival AY.4, the largest Delta lineage the world had ever sequenced, but it did it in a fraction of the time.',
-      'This was one of the fastest lineage replacements ever recorded. Tap the same band in the Explorer and it filters every chart at once — this focus interaction is that engine, running on a preset.',
+      'Focus on a single newcomer, BA.1.1, and the scale of the shift is obvious. On its own it grew to rival AY.4, the largest Delta lineage the world had ever sequenced, but it did it in a fraction of the time.',
+      'This was one of the fastest lineage replacements ever recorded. Tap the same band in the Explorer and it filters every chart at once. This focus interaction is that engine, running on a preset.',
     ],
     chart: 'lineage-over-time',
     params: HANDOVER,

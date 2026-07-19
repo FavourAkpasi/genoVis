@@ -7,7 +7,6 @@ import { useActiveScene } from '@/components/modules/case-study/hooks/useActiveS
 import { FINALE, STORY } from '@/components/modules/case-study/story';
 import type { SceneT } from '@/components/modules/case-study/story';
 import { buttonVariants } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { routes } from '@/router/routes';
 
@@ -23,19 +22,21 @@ const stepMeta = (step: StepT) => (step.kind === 'finale' ? FINALE : step.scene)
 
 const StageHeader = () => (
   <div className="flex flex-col gap-0.5">
-    <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">Case study</span>
-    <p className="text-lg font-semibold tracking-tight">Tracing a variant’s rise and fall</p>
+    <span className="text-[11px] font-medium tracking-wider text-muted-foreground uppercase">Sample Case study</span>
+    <p className="text-3xl font-semibold tracking-tight">Tracing a variant’s Trajectory</p>
   </div>
 );
 
 const StepText = ({ step }: { step: StepT }) => {
   const meta = stepMeta(step);
   return (
-    <div className="flex max-w-md flex-col gap-3">
-      <span className="text-sm font-medium tracking-wider text-muted-foreground uppercase">{meta.kicker}</span>
-      <h2 className="text-4xl font-semibold tracking-tight text-balance sm:text-3xl">{meta.title}</h2>
+    <div className="flex max-w-xl flex-col gap-4">
+      <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase sm:text-sm">
+        {meta.kicker}
+      </span>
+      <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl lg:text-5xl">{meta.title}</h2>
       {meta.body.map((paragraph, index) => (
-        <p key={index} className="text-xs leading-relaxed text-muted-foreground sm:text-base">
+        <p key={index} className="text-base leading-relaxed text-muted-foreground sm:text-lg lg:text-xl">
           {paragraph}
         </p>
       ))}
@@ -52,11 +53,9 @@ const StepText = ({ step }: { step: StepT }) => {
 const StepGraphic = ({ step }: { step: StepT }) => {
   if (step.kind === 'finale') {
     return (
-      <Card className="border-none shadow-none">
-        <CardContent className="flex aspect-4/3 items-center justify-center p-4 sm:p-6">
-          <FinaleGraphic />
-        </CardContent>
-      </Card>
+      <div className="flex aspect-4/3 items-center justify-center p-4 sm:p-6">
+        <FinaleGraphic />
+      </div>
     );
   }
   return <StoryGraphic scene={step.scene} />;
