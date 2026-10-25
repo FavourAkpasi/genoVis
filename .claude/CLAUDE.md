@@ -66,3 +66,7 @@ Requires Node >= 22. `.env` is optional: `rspack.config.ts` loads it with `proce
 ## CI
 
 `.github/workflows/ci.yml` — on PRs and pushes to `main`: typecheck, lint, `test:coverage`. On PRs it also runs the target branch's coverage as a baseline, and a separate `report` job (the only one with `pull-requests: write`, never runs `npm ci`) posts a coverage comment with the delta via `davelosert/vitest-coverage-report-action` (needs the `json-summary` reporter + `reportOnFailure` in `vitest.config.ts`). Actions are pinned to commit SHAs — bump the SHA and the `# vX` comment together.
+
+## Deploy (Vercel)
+
+Project `geno-vis` (https://geno-vis.vercel.app), Git-connected to GitHub: merging to `main` deploys Production; every other branch push / PR gets a Preview URL. No `vercel.json` — the dashboard preset says "Vite" but `npm run build` → `dist/` works as-is for Rspack. The Sentry env vars (`PUBLIC_SENTRY_DSN`, `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT`) are set for **Production only**, so Previews ship with Sentry off and upload no source maps. `vercel link` writes `.vercel/` and `.env.local` (both git-ignored). Repos auto-delete head branches on merge.
