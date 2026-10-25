@@ -25,7 +25,7 @@ type CrossfilterRequestT =
   | { type: 'window'; start; count }             // ask for the visible rows only
   | { type: 'export'; limit }                    // build the CSV off-thread`;
 
-export const WORKER_WINDOW_SNIPPET = `// crossfilter.worker.ts — the main thread only ever receives what's on screen
+export const WORKER_WINDOW_SNIPPET = `// crossfilter.engine.ts (runs in the worker) — the main thread only ever receives what's on screen
 const rows = matchedIndices
   .slice(message.start, message.start + message.count) // e.g. 30 of 2,000,000
   .map((index) => dataset[index]);

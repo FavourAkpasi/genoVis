@@ -1,10 +1,15 @@
-import { IconCalendar } from '@tabler/icons-react';
+import { IconCalendar, IconLoader2 } from '@tabler/icons-react';
+import { lazy, Suspense } from 'react';
 import type { DateRange } from 'react-day-picker';
 
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+
+// react-day-picker (~124 KiB) is only needed once the popover opens, so the
+// Calendar is a lazy boundary: its chunk downloads on first open, not on the
+// Explorer landing page. The trigger button below stays eager.
+const Calendar = lazy(() => import('@/components/ui/calendar').then((m) => ({ default: m.Calendar })));
 
 interface CustomDateRangePickerProps {
   value: DateRange | undefined;
@@ -56,16 +61,28 @@ export const CustomDateRangePicker = ({
         {label ?? placeholder}
       </PopoverTrigger>
       <PopoverContent align="start" className="w-auto p-0">
-        <Calendar
-          mode="range"
-          captionLayout="dropdown"
-          startMonth={start}
-          endMonth={end}
-          defaultMonth={defaultMonth}
-          selected={value}
-          onSelect={onValueChange}
-          numberOfMonths={2}
-        />
+        <Suspense
+          fallback={
+            <div
+              className="flex h-[300px] w-[560px] items-center justify-center"
+              role="status"
+              aria-label="Loading calendar"
+            >
+              <IconLoader2 className="size-5 animate-spin text-muted-foreground" />
+            </div>
+          }
+        >
+          <Calendar
+            mode="range"
+            captionLayout="dropdown"
+            startMonth={start}
+            endMonth={end}
+            defaultMonth={defaultMonth}
+            selected={value}
+            onSelect={onValueChange}
+            numberOfMonths={2}
+          />
+        </Suspense>
       </PopoverContent>
     </Popover>
   );

@@ -20,5 +20,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["rspack.config.ts"]
+  "include": ["rspack.config.ts", "vitest.config.ts"]
 }

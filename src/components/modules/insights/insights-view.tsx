@@ -117,7 +117,7 @@ export const InsightsView = () => {
               facet&apos;s selection but not its own. Even CSV export is serialized in the worker, so a 100k-row
               download never blocks the UI.
             </Prose>
-            <CodeBlock caption="crossfilter.worker.ts — hand back only the visible rows" code={WORKER_WINDOW_SNIPPET} />
+            <CodeBlock caption="crossfilter.engine.ts — hand back only the visible rows" code={WORKER_WINDOW_SNIPPET} />
           </Section>
 
           <Section id="virtualization" index={4} kicker="Rendering at scale" title="Rendering only what you can see">

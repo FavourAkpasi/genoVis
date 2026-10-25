@@ -6,9 +6,13 @@
   "scripts": {
     "dev": "rspack serve",
     "build": "tsc -b && rspack build",
+    "analyze": "RSDOCTOR=true rspack build",
     "lint": "oxlint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -32,18 +36,23 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@rsdoctor/rspack-plugin": "^1.6.0",
     "@rspack/cli": "^2.1.4",
     "@rspack/core": "^2.1.4",
     "@rspack/dev-server": "^2.1.0",
     "@rspack/plugin-react-refresh": "^2.0.2",
-    "@sentry/vite-plugin": "^5.4.0",
+    "@sentry/webpack-plugin": "^11.9.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.8",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.10",
     "jsdom": "^29.1.1",
+    "msw": "^2.15.0",
     "oxlint": "^1.74.0",
     "postcss-loader": "^8.2.1",
     "prettier": "^3.8.3",

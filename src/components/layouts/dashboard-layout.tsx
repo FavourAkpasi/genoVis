@@ -1,7 +1,8 @@
 import { IconMenu2 } from '@tabler/icons-react';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
+import { RouteFallback } from '@/components/layouts/route-fallback';
 import { ThemeToggle } from '@/components/layouts/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -61,7 +62,9 @@ export const DashboardLayout = () => {
         </nav>
       </header>
       <main className="flex-1">
-        <Outlet />
+        <Suspense fallback={<RouteFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );
