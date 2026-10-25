@@ -61,7 +61,7 @@ const MultiSelect = ({
 
   return (
     <Combobox items={items} multiple value={value} onValueChange={onValueChange} disabled={disabled}>
-      <ComboboxChips ref={anchorRef} className={cn('flex-nowrap overflow-hidden', className)} aria-label={label}>
+      <ComboboxChips ref={anchorRef} className={cn('flex-nowrap overflow-hidden', className)}>
         <ComboboxValue>
           {(selected: string[]) => (
             <>
@@ -78,7 +78,7 @@ const MultiSelect = ({
             </>
           )}
         </ComboboxValue>
-        <ComboboxChipsInput placeholder={hasSelection ? '' : placeholder} />
+        <ComboboxChipsInput placeholder={hasSelection ? '' : placeholder} aria-label={label} />
         {hasSelection ? <ComboboxClear /> : <ComboboxTrigger />}
       </ComboboxChips>
       <ComboboxContent anchor={anchorRef}>

@@ -63,7 +63,13 @@ export const SpikeVirion = ({ className }: { className?: string }) => (
       ))}
     </g>
 
-    <circle cx={CENTER} cy={CENTER} r={BODY_R} className="gv-virion-body fill-muted stroke-chart-3/30" strokeWidth={2} />
+    <circle
+      cx={CENTER}
+      cy={CENTER}
+      r={BODY_R}
+      className="gv-virion-body fill-muted stroke-chart-3/30"
+      strokeWidth={2}
+    />
     <circle cx={CENTER} cy={CENTER} r={BODY_R * 0.55} className="fill-chart-3/10" />
   </svg>
 );

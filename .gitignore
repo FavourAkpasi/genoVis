@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 dist
+coverage
 dist-ssr
 *.local
 
@@ -31,3 +32,4 @@ dist-ssr
 
 # Claude local (personal) settings
 .claude/settings.local.json
+.vercel

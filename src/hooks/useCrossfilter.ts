@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { SLICE_PAGE_SIZE, SLICE_TARGET } from '@/components/modules/explorer/sliceConfig';
 import { downloadCsv } from '@/lib/csv';
 import type { QueryParamsT } from '@/lib/endpoints';
+import { captureError, failSpan, type SpanT, startSpan } from '@/lib/observability';
 import type { DetailRowT } from '@/types/lapis';
 import {
   type CrossfilterFilterT,
@@ -42,6 +43,8 @@ export const useCrossfilter = (params: QueryParamsT) => {
   const workerRef = useRef<Worker | null>(null);
   const windowRef = useRef<WindowDataT | null>(null);
   const pendingRef = useRef<{ start: number; end: number } | null>(null);
+  // Times one slice fetch end-to-end (first request → last page held in the worker).
+  const fetchSpanRef = useRef<SpanT | null>(null);
 
   const [state, setState] = useState<CrossfilterStateT | null>(null);
   const [windowData, setWindowData] = useState<WindowDataT | null>(null);
@@ -56,6 +59,12 @@ export const useCrossfilter = (params: QueryParamsT) => {
     worker.onmessage = (event: MessageEvent) => {
       const message = event.data as CrossfilterMessageT;
       if (message.type === 'state') {
+        const span = fetchSpanRef.current;
+        if (span && message.state.done) {
+          span.setAttribute('rows.loaded', message.state.loaded);
+          span.end();
+          fetchSpanRef.current = null;
+        }
         setState(message.state);
         // The prior window indexes into the old result — drop it and re-request.
         windowRef.current = null;
@@ -75,10 +84,20 @@ export const useCrossfilter = (params: QueryParamsT) => {
         downloadCsv('genovis-samples.csv', message.csv);
         return;
       }
+      if (fetchSpanRef.current) failSpan(fetchSpanRef.current);
+      fetchSpanRef.current = null;
+      captureError(new Error(message.message), { tags: { source: 'crossfilter-worker' } });
       setError(message.message);
+    };
+    // An uncaught exception inside the worker — without this the table would wait forever.
+    worker.onerror = (event: ErrorEvent) => {
+      captureError(event.error ?? new Error(event.message), { tags: { source: 'crossfilter-worker' } });
+      setError(event.message || 'The data worker crashed');
     };
     workerRef.current = worker;
     return () => {
+      fetchSpanRef.current?.end();
+      fetchSpanRef.current = null;
       worker.terminate();
       workerRef.current = null;
     };
@@ -93,6 +112,9 @@ export const useCrossfilter = (params: QueryParamsT) => {
     windowRef.current = null;
     pendingRef.current = null;
     setWindowData(null);
+    // A superseded fetch is abandoned by the worker; close its span so it isn't left open.
+    fetchSpanRef.current?.end();
+    fetchSpanRef.current = startSpan('crossfilter.slice-fetch', 'worker.fetch', { 'rows.target': SLICE_TARGET });
     worker.postMessage({ type: 'fetch', params: paramsRef.current, target: SLICE_TARGET, pageSize: SLICE_PAGE_SIZE });
   }, [paramsKey]);
 
