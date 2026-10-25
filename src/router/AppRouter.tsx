@@ -25,7 +25,8 @@ const router = createAppRouter([
         children: [
           { path: routes.explorer, element: <ExplorerView /> },
           { path: routes.caseStudy, element: <CaseStudyView /> },
-          { path: routes.insights, element: <InsightsView /> },          { path: '*', element: <Navigate to={routes.explorer} replace /> },
+          { path: routes.insights, element: <InsightsView /> },
+          { path: '*', element: <Navigate to={routes.explorer} replace /> },
         ],
       },
     ],

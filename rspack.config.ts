@@ -57,6 +57,8 @@ export default defineConfig({
           loader: 'builtin:swc-loader',
           options: {
             jsc: {
+              // SWC defaults to ES5, which rewrites every async/await into a generator state machine.
+              target: 'es2022',
               parser: {
                 syntax: 'typescript',
                 tsx: true,
@@ -82,6 +84,8 @@ export default defineConfig({
     new rspack.DefinePlugin({
       'process.env.PUBLIC_SENTRY_DSN': JSON.stringify(process.env.PUBLIC_SENTRY_DSN ?? ''),
       'process.env.PUBLIC_SENTRY_ENVIRONMENT': JSON.stringify(process.env.PUBLIC_SENTRY_ENVIRONMENT ?? ''),
+      // Tree-shakes the Sentry SDK's debug logger out of production bundles.
+      __SENTRY_DEBUG__: JSON.stringify(isDev),
     }),
     ...(isDev ? [new ReactRefreshRspackPlugin()] : []),
     ...(isAnalyze ? [new RsdoctorRspackPlugin()] : []),
@@ -101,6 +105,38 @@ export default defineConfig({
     path: path.resolve(__dirname, 'dist'),
     publicPath: '/',
     clean: true,
+    // Content-hashed names under static/, which vercel.json serves as immutable (cached for a year).
+    filename: isDev ? '[name].js' : 'static/js/[name].[contenthash:8].js',
+    chunkFilename: isDev ? '[name].js' : 'static/js/[name].[contenthash:8].js',
+    cssFilename: isDev ? '[name].css' : 'static/css/[name].[contenthash:8].css',
+    cssChunkFilename: isDev ? '[name].css' : 'static/css/[name].[contenthash:8].css',
+    assetModuleFilename: 'static/media/[hash][ext]',
+  },
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        // Initial-load vendors in their own long-lived chunks, so an app-only deploy
+        // re-downloads just main.js. Async-only packages stay with their route chunks.
+        framework: {
+          test: /node_modules[\\/](react|react-dom|scheduler|react-router|react-router-dom)[\\/]/,
+          name: 'framework',
+          chunks: 'initial',
+          priority: 20,
+        },
+        sentry: {
+          test: /node_modules[\\/]@sentry[\\/]/,
+          name: 'sentry',
+          chunks: 'initial',
+          priority: 10,
+        },
+        vendors: {
+          test: /node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'initial',
+          priority: 0,
+        },
+      },
+    },
   },
   devServer: {
     port: 5173,
